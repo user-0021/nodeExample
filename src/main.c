@@ -1,7 +1,10 @@
-#include <stdint.h>
+#include <nodeSystem.h>
 #include <unistd.h>
+#include <stdio.h>
 
 int main(){
-	uint32_t counts[3] = {1,2,3};
-	write(STDOUT_FILENO,counts,sizeof(uint32_t)*3);
+	nodeSystemAddPipe("First",NODE_IN,NODE_INT_8,1);
+	nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,1);
+
+	nodeSystemInit();
 }

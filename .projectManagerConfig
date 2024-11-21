@@ -3,8 +3,8 @@ CC = gcc
 CFLAG =
 OBJ_FLAG =
 LIBRARY=
-SOURCE_DIR = src
-INCLUDE_DIR = include
+SOURCE_DIR = src library/nodeSystem
+INCLUDE_DIR = include library/nodeSystem
 OBJ_DIR = obj
 LIB =
 
