@@ -7,4 +7,6 @@ int main(){
 	nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,1);
 
 	nodeSystemInit();
+
+	nodeSystemBegine();
 }

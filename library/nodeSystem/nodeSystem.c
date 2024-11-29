@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 typedef struct{
+	int fd[2];
 	char* pipeName;
 	uint8_t type;
 	uint8_t unit;
@@ -18,12 +19,22 @@ static uint8_t _nodeSystemIsActive = 0;
 static uint16_t _pipe_count = 0;
 static _node_pipe* _pipes = NULL;
 
-static const uint32_t _node_head = 0x83DFC690;
-static const uint32_t _node_eof  = 0x85CBADEF;
+static const uint32_t _node_init_head = 0x83DFC690;
+static const uint32_t _node_init_eof  = 0x85CBADEF;
+static const uint32_t _node_begin_head = 0x9067F3A2;
+static const uint32_t _node_begin_eof  = 0x910AC8BB;
 
 int nodeSystemInit(){
+	//check system state
+	if(_nodeSystemIsActive){
+		return -3;
+	}
+	
+	//set state
+	uint8_t _nodeSystemIsActive = 1;
+
 	//send header
-	write(STDOUT_FILENO,&_node_head,sizeof(_node_head));
+	write(STDOUT_FILENO,&_node_init_head,sizeof(_node_init_head));
 
 	//send pipe count
 	write(STDOUT_FILENO,&_pipe_count,sizeof(_pipe_count));
@@ -38,7 +49,7 @@ int nodeSystemInit(){
 	}
 	
 	//send eof
-	write(STDOUT_FILENO,&_node_eof,sizeof(_node_eof));
+	write(STDOUT_FILENO,&_node_init_eof,sizeof(_node_init_eof));
 }
 
 int nodeSystemAddPipe(const char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength){
@@ -79,4 +90,34 @@ int nodeSystemAddPipe(const char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_U
 }
 
 int nodeSystemBegine(){
+	//check system state
+	if(_nodeSystemIsActive != 1){
+		return -3;
+	}
+
+	//set state
+	uint8_t _nodeSystemIsActive = 2;
+
+	//send header
+	write(STDOUT_FILENO,&_node_begin_head,sizeof(_node_begin_head));
+
+	//send pipe data
+	uint16_t i;
+	for(i = 0;i < _pipe_count;i++){
+		switch(_pipes[i].type){
+			case NODE_IN:{
+				read(STDIN_FILENO,&_pipes[i].fd[0],sizeof(int));
+				break;
+			}case NODE_OUT:{
+				read(STDIN_FILENO,&_pipes[i].fd[1],sizeof(int));
+				break;
+			}case NODE_IN_OUT:{
+				read(STDIN_FILENO,_pipes[i].fd,sizeof(int) << 1);
+				break;
+			}
+		}
+	}
+	
+	//send eof
+	write(STDOUT_FILENO,&_node_begin_eof,sizeof(_node_begin_eof));
 }
