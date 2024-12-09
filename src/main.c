@@ -9,4 +9,9 @@ int main(){
 	nodeSystemInit();
 
 	nodeSystemBegine();
+
+
+	while(!nodeSystemIsActive()){
+
+	}
 }

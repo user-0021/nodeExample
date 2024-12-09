@@ -26,3 +26,4 @@ typedef enum{
 int nodeSystemInit();
 int nodeSystemAddPipe(const char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength);
 int nodeSystemBegine();
+int nodeSystemIsActive();

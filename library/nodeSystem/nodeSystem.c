@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <nodeSystem.h>
 #include <stdio.h>
 
@@ -18,6 +19,7 @@ static uint8_t _nodeSystemIsActive = 0;
 
 static uint16_t _pipe_count = 0;
 static _node_pipe* _pipes = NULL;
+static int _parent;
 
 static const uint32_t _node_init_head = 0x83DFC690;
 static const uint32_t _node_init_eof  = 0x85CBADEF;
@@ -32,6 +34,9 @@ int nodeSystemInit(){
 	
 	//set state
 	_nodeSystemIsActive = 1;
+
+	//set parentPid
+	_parent = getppid();
 
 	//send header
 	write(STDOUT_FILENO,&_node_init_head,sizeof(_node_init_head));
@@ -120,4 +125,9 @@ int nodeSystemBegine(){
 	
 	//send eof
 	write(STDOUT_FILENO,&_node_begin_eof,sizeof(_node_begin_eof));
+}
+
+
+int nodeSystemIsActive(){
+	return kill(_parent,0);
 }
