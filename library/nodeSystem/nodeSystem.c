@@ -31,7 +31,7 @@ int nodeSystemInit(){
 	}
 	
 	//set state
-	uint8_t _nodeSystemIsActive = 1;
+	_nodeSystemIsActive = 1;
 
 	//send header
 	write(STDOUT_FILENO,&_node_init_head,sizeof(_node_init_head));
