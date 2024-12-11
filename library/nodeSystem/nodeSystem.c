@@ -4,8 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <limits.h>
 #include <nodeSystem.h>
 #include <stdio.h>
+#include <errno.h>
 
 typedef struct{
 	int fd[2];
@@ -17,6 +19,8 @@ typedef struct{
 
 static uint8_t _nodeSystemIsActive = 0;
 
+static uint8_t no_log;
+static FILE* logFile;
 static uint16_t _pipe_count = 0;
 static _node_pipe* _pipes = NULL;
 static int _parent;
@@ -37,6 +41,24 @@ int nodeSystemInit(){
 
 	//set parentPid
 	_parent = getppid();
+
+	//read no_log
+	read(STDIN_FILENO,&no_log,sizeof(no_log));
+
+	//read log file path
+	uint16_t len;
+	char tmp[PATH_MAX];
+	read(STDIN_FILENO,&len,sizeof(len));
+	read(STDIN_FILENO,tmp,len);
+
+	//create log file
+	if(!no_log){
+		logFile = fopen(tmp,"w");
+		if(logFile == NULL){
+			no_log = 0;
+		}
+	}
+
 
 	//send header
 	write(STDOUT_FILENO,&_node_init_head,sizeof(_node_init_head));
