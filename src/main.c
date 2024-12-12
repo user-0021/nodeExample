@@ -10,8 +10,11 @@ int main(){
 
 	nodeSystemBegine();
 
+	nodeSystemDebugLog("SystemBegin");
 
 	while(!nodeSystemIsActive()){
 
+		nodeSystemDebugLog("Loop!");
+		sleep(1);
 	}
 }

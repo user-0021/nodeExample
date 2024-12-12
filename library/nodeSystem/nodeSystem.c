@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <nodeSystem.h>
 #include <stdio.h>
-#include <errno.h>
+#include <time.h>
 
 typedef struct{
 	int fd[2];
@@ -19,8 +19,9 @@ typedef struct{
 
 static uint8_t _nodeSystemIsActive = 0;
 
-static uint8_t no_log;
 static FILE* logFile;
+static uint8_t no_log;
+static time_t timeZone;
 static uint16_t _pipe_count = 0;
 static _node_pipe* _pipes = NULL;
 static int _parent;
@@ -29,6 +30,8 @@ static const uint32_t _node_init_head = 0x83DFC690;
 static const uint32_t _node_init_eof  = 0x85CBADEF;
 static const uint32_t _node_begin_head = 0x9067F3A2;
 static const uint32_t _node_begin_eof  = 0x910AC8BB;
+
+static char* getRealTimeStr();
 
 int nodeSystemInit(){
 	//check system state
@@ -41,6 +44,12 @@ int nodeSystemInit(){
 
 	//set parentPid
 	_parent = getppid();
+
+	//calc timezone
+	time_t t = time(NULL);
+	struct tm lt = {0};
+	localtime_r(&t, &lt);
+	timeZone = lt.tm_gmtoff;
 
 	//read no_log
 	read(STDIN_FILENO,&no_log,sizeof(no_log));
@@ -55,7 +64,7 @@ int nodeSystemInit(){
 	if(!no_log){
 		logFile = fopen(tmp,"w");
 		if(logFile == NULL){
-			no_log = 0;
+			no_log = 1;
 		}
 	}
 
@@ -79,7 +88,7 @@ int nodeSystemInit(){
 	write(STDOUT_FILENO,&_node_init_eof,sizeof(_node_init_eof));
 }
 
-int nodeSystemAddPipe(const char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength){
+int nodeSystemAddPipe(char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength){
 	//check system state
 	if(_nodeSystemIsActive){
 		return -3;
@@ -152,4 +161,41 @@ int nodeSystemBegine(){
 
 int nodeSystemIsActive(){
 	return kill(_parent,0);
+}
+
+void nodeSystemDebugLog(char* const str){
+	if(no_log)
+		return;
+
+	char* time = getRealTimeStr();
+	size_t len = strlen(time);
+	fwrite(time,1,len,logFile);
+
+	fwrite(":",1,1,logFile);
+
+	len = strlen(str);
+	fwrite(str,1,len,logFile);
+
+	fwrite("\n",1,1,logFile);
+
+	fflush(logFile);
+}
+
+static char* getRealTimeStr(){
+	static char timeStr[64];
+	static time_t befor;
+
+	struct timespec spec;
+    struct tm _tm;
+	clock_gettime(CLOCK_REALTIME_COARSE, &spec);
+	spec.tv_sec += timeZone;
+
+	if(spec.tv_sec == befor)
+		return timeStr;
+
+	gmtime_r(&spec.tv_sec,&_tm);
+	strftime(timeStr,sizeof(timeStr),"%Y-%m-%d-(%a)-%H:%M:%S",&_tm);
+
+	befor = spec.tv_sec;
+	return timeStr;
 }
