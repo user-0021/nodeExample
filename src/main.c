@@ -3,8 +3,8 @@
 #include <stdio.h>
 
 int main(){
-	nodeSystemAddPipe("First",NODE_IN,NODE_INT_8,1);
-	nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,1);
+	int first  = nodeSystemAddPipe("First",NODE_IN,NODE_INT_8,1);
+	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2);
 
 	nodeSystemInit();
 

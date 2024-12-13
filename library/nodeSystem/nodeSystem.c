@@ -10,7 +10,7 @@
 #include <time.h>
 
 typedef struct{
-	int fd[2];
+	int sID;
 	char* pipeName;
 	uint8_t type;
 	uint8_t unit;
@@ -99,6 +99,13 @@ int nodeSystemAddPipe(char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT un
 		return -4;
 	}
 	
+	//name check
+	uint16_t i;
+	for(i = 0;i < _pipe_count;i++){
+		if(strcmp(_pipes[i].pipeName,pipeName) == 0)
+			return -5;
+	}
+
 	//malloc piep struct
 	_node_pipe pipe = {};
 	
@@ -132,7 +139,7 @@ int nodeSystemBegine(){
 	}
 
 	//set state
-	uint8_t _nodeSystemIsActive = 2;
+	_nodeSystemIsActive = 2;
 
 	//send header
 	write(STDOUT_FILENO,&_node_begin_head,sizeof(_node_begin_head));
@@ -140,17 +147,8 @@ int nodeSystemBegine(){
 	//send pipe data
 	uint16_t i;
 	for(i = 0;i < _pipe_count;i++){
-		switch(_pipes[i].type){
-			case NODE_IN:{
-				read(STDIN_FILENO,&_pipes[i].fd[0],sizeof(int));
-				break;
-			}case NODE_OUT:{
-				read(STDIN_FILENO,&_pipes[i].fd[1],sizeof(int));
-				break;
-			}case NODE_IN_OUT:{
-				read(STDIN_FILENO,_pipes[i].fd,sizeof(int) << 1);
-				break;
-			}
+		if(_pipes[i].type == NODE_OUT){
+			read(STDIN_FILENO,&_pipes[i].sID,sizeof(_pipes[i].sID));
 		}
 	}
 	
@@ -198,4 +196,11 @@ static char* getRealTimeStr(){
 
 	befor = spec.tv_sec;
 	return timeStr;
+}
+
+int nodeSystemRead(int pipeID,void* buffer,uint16_t size){
+}
+
+int nodeSystemWrite(int pipeID,void* buffer,uint16_t size){
+
 }

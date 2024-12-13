@@ -3,8 +3,7 @@
 
 typedef enum{
 	NODE_IN		= 0,
-	NODE_OUT	= 1,
-	NODE_IN_OUT	= 2
+	NODE_OUT	= 1
 } NODE_PIPE_TYPE;
 
 typedef enum{
@@ -23,8 +22,26 @@ typedef enum{
 	NODE_DOUBLE		= 12,
 } NODE_DATA_UNIT;
 
+static const uint16_t NODE_DATA_UNIT_SIZE[13] = {
+	0,
+	sizeof(char),
+	1,
+	sizeof(int8_t),
+	sizeof(int16_t),
+	3,
+	sizeof(int32_t),
+	sizeof(uint8_t),
+	sizeof(uint16_t),
+	3,
+	sizeof(uint32_t),
+	sizeof(float),
+	sizeof(double)
+};
+
 int nodeSystemInit();
 int nodeSystemAddPipe(char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength);
 int nodeSystemBegine();
 int nodeSystemIsActive();
 void nodeSystemDebugLog(char* const str);
+int nodeSystemRead(int pipeID,void* buffer,uint16_t size);
+int nodeSystemWrite(int pipeID,void* buffer,uint16_t size);
