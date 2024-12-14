@@ -5,12 +5,16 @@
 #include <unistd.h>
 #include <signal.h>
 #include <limits.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <nodeSystem.h>
 #include <stdio.h>
+#include <errno.h>
 #include <time.h>
 
 typedef struct{
 	int sID;
+	void* memory;
 	char* pipeName;
 	uint8_t type;
 	uint8_t unit;
@@ -149,6 +153,11 @@ int nodeSystemBegine(){
 	for(i = 0;i < _pipe_count;i++){
 		if(_pipes[i].type == NODE_OUT){
 			read(STDIN_FILENO,&_pipes[i].sID,sizeof(_pipes[i].sID));
+			_pipes[i].memory = shmat(_pipes[i].sID,NULL,0);
+			if(_pipes[i].memory < 0){
+				nodeSystemDebugLog(strerror(errno));
+				exit(1);
+			}
 		}
 	}
 	
