@@ -5,6 +5,7 @@
 int main(){
 	int first  = nodeSystemAddPipe("First",NODE_IN,NODE_INT_8,1);
 	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2);
+	int third  = nodeSystemAddPipe("A",NODE_OUT,NODE_INT_8,1);
 
 	nodeSystemInit();
 
