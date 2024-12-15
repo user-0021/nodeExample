@@ -41,7 +41,7 @@ static const uint16_t NODE_DATA_UNIT_SIZE[13] = {
 int nodeSystemInit();
 int nodeSystemAddPipe(char* const pipeName,NODE_PIPE_TYPE type,NODE_DATA_UNIT unit,uint16_t arrayLength);
 int nodeSystemBegine();
-int nodeSystemIsActive();
+int nodeSystemLoop();
 void nodeSystemDebugLog(char* const str);
 int nodeSystemRead(int pipeID,void* buffer,uint16_t size);
 int nodeSystemWrite(int pipeID,void* buffer,uint16_t size);

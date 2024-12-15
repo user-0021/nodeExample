@@ -13,9 +13,19 @@ int main(){
 
 	nodeSystemDebugLog("SystemBegin");
 
-	while(!nodeSystemIsActive()){
+	uint8_t rdata = 0;
+	char msg[2048];
 
-		nodeSystemDebugLog("Loop!");
-		sleep(1);
+	while(!nodeSystemLoop()){
+		uint8_t wdata = 0;
+		int ret = nodeSystemRead(first,&rdata,0);
+		if(ret == 1){
+			wdata = rdata + 1;
+		}
+
+		nodeSystemWrite(third,&wdata,0);
+		sprintf(msg,"Count %d",(int)(uint16_t)rdata);
+		nodeSystemDebugLog(msg);
+		sleep(3);
 	}
 }

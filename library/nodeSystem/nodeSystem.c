@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <nodeSystem.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
@@ -16,6 +16,7 @@ typedef struct{
 	int sID;
 	void* memory;
 	char* pipeName;
+	uint8_t count;
 	uint8_t type;
 	uint8_t unit;
 	uint16_t length;
@@ -163,10 +164,40 @@ int nodeSystemBegine(){
 	
 	//send eof
 	write(STDOUT_FILENO,&_node_begin_eof,sizeof(_node_begin_eof));
+
+	//set nonblocking
+	fcntl(STDIN_FILENO,F_SETFL,fcntl(STDIN_FILENO ,F_GETFL) | O_NONBLOCK);
 }
 
 
-int nodeSystemIsActive(){
+int nodeSystemLoop(){
+	uint16_t  pipeId;
+	
+	if(read(STDIN_FILENO,&pipeId,sizeof(pipeId)) == sizeof(uint16_t)){
+		//set blocking
+		fcntl(STDIN_FILENO ,F_SETFL,fcntl(STDIN_FILENO ,F_GETFL) & (~O_NONBLOCK));
+
+		if(_pipes[pipeId].sID != 0){
+			if(shmdt(_pipes[pipeId].memory) < 0){
+				char msg[4096];
+				sprintf(msg,"Pipe[%s] failed shmdt():%s",_pipes[pipeId].pipeName,strerror(errno));
+				nodeSystemDebugLog(msg);
+			}
+		}
+
+		read(STDIN_FILENO,&_pipes[pipeId].sID,sizeof(_pipes[pipeId].sID));
+		_pipes[pipeId].memory = shmat(_pipes[pipeId].sID,NULL,SHM_RDONLY);
+		_pipes[pipeId].count = 0;
+
+		char msg[4096];
+		sprintf(msg,"Pipe[%s] pipe connected",_pipes[pipeId].pipeName);
+		nodeSystemDebugLog(msg);
+
+		//set nonblocking
+		fcntl(STDIN_FILENO,F_SETFL,fcntl(STDIN_FILENO ,F_GETFL) | O_NONBLOCK);
+	}
+
+
 	return kill(_parent,0);
 }
 
@@ -208,8 +239,28 @@ static char* getRealTimeStr(){
 }
 
 int nodeSystemRead(int pipeID,void* buffer,uint16_t size){
+	
+	if(!_pipes[pipeID].sID)
+		return -1;
+	
+	//read count
+	uint8_t count = ((char*)_pipes[pipeID].memory)[0];
+	if(count == _pipes[pipeID].count)
+		return 0;
+	_pipes[pipeID].count = count;
+
+	//copy data
+	memcpy(buffer,_pipes[pipeID].memory+1,NODE_DATA_UNIT_SIZE[_pipes[pipeID].unit] * _pipes[pipeID].length);
+
+	return 1;
 }
 
 int nodeSystemWrite(int pipeID,void* buffer,uint16_t size){
+	//write count
+	((uint8_t*)_pipes[pipeID].memory)[0] = ++_pipes[pipeID].count;
 
+	//copy data
+	memcpy(_pipes[pipeID].memory+1,buffer,NODE_DATA_UNIT_SIZE[_pipes[pipeID].unit] * _pipes[pipeID].length);
+
+	return 0;
 }
