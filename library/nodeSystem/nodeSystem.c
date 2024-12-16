@@ -185,13 +185,20 @@ int nodeSystemLoop(){
 			}
 		}
 
-		read(STDIN_FILENO,&_pipes[pipeId].sID,sizeof(_pipes[pipeId].sID));
-		_pipes[pipeId].memory = shmat(_pipes[pipeId].sID,NULL,SHM_RDONLY);
 		_pipes[pipeId].count = 0;
+		read(STDIN_FILENO,&_pipes[pipeId].sID,sizeof(_pipes[pipeId].sID));
+		if(_pipes[pipeId].sID != 0){			
+			_pipes[pipeId].memory = shmat(_pipes[pipeId].sID,NULL,SHM_RDONLY);
 
-		char msg[4096];
-		sprintf(msg,"Pipe[%s] pipe connected",_pipes[pipeId].pipeName);
-		nodeSystemDebugLog(msg);
+			char msg[4096];
+			sprintf(msg,"Pipe[%s] pipe connected",_pipes[pipeId].pipeName);
+			nodeSystemDebugLog(msg);
+		}else{
+			char msg[4096];
+			sprintf(msg,"Pipe[%s] pipe diss connect",_pipes[pipeId].pipeName);
+			nodeSystemDebugLog(msg);
+		}
+		
 
 		//set nonblocking
 		fcntl(STDIN_FILENO,F_SETFL,fcntl(STDIN_FILENO ,F_GETFL) | O_NONBLOCK);
