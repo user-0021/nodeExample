@@ -152,9 +152,13 @@ int nodeSystemBegine(){
 	//send pipe data
 	uint16_t i;
 	for(i = 0;i < _pipe_count;i++){
-		if(_pipes[i].type == NODE_OUT){
+		if(_pipes[i].type != NODE_IN){
 			read(STDIN_FILENO,&_pipes[i].sID,sizeof(_pipes[i].sID));
-			_pipes[i].memory = shmat(_pipes[i].sID,NULL,0);
+			if(_pipes[i].type == NODE_OUT)
+				_pipes[i].memory = shmat(_pipes[i].sID,NULL,0);
+			else
+				_pipes[i].memory = shmat(_pipes[i].sID,NULL,SHM_RDONLY);
+
 			if(_pipes[i].memory < 0){
 				nodeSystemDebugLog(strerror(errno));
 				exit(1);
@@ -247,7 +251,7 @@ static char* getRealTimeStr(){
 
 int nodeSystemRead(int pipeID,void* buffer,uint16_t size){
 	
-	if(!_pipes[pipeID].sID)
+	if(!_pipes[pipeID].sID || _pipes[pipeID].type == NODE_OUT)
 		return -1;
 	
 	//read count
@@ -263,6 +267,10 @@ int nodeSystemRead(int pipeID,void* buffer,uint16_t size){
 }
 
 int nodeSystemWrite(int pipeID,void* buffer,uint16_t size){
+
+	if(_pipes[pipeID].type != NODE_IN)
+		return -1;
+
 	//write count
 	((uint8_t*)_pipes[pipeID].memory)[0] = ++_pipes[pipeID].count;
 
