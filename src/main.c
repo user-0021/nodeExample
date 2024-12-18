@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int main(){
-	int first  = nodeSystemAddPipe("First",NODE_CONST,NODE_INT_8,1);
+	int first  = nodeSystemAddPipe("First",NODE_CONST,NODE_INT_32,1);
 	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2);
 	int third  = nodeSystemAddPipe("A",NODE_OUT,NODE_INT_8,1);
 
@@ -13,7 +13,7 @@ int main(){
 
 	nodeSystemDebugLog("SystemBegin");
 
-	uint8_t rdata = 0;
+	int rdata = 0;
 	char msg[2048];
 
 	while(!nodeSystemLoop()){
@@ -24,7 +24,7 @@ int main(){
 		}
 
 		nodeSystemWrite(third,&wdata,0);
-		sprintf(msg,"Count %d",(int)(uint16_t)rdata);
+		sprintf(msg,"Count %d",rdata);
 		nodeSystemDebugLog(msg);
 		sleep(3);
 	}
