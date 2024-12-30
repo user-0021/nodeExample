@@ -3,10 +3,12 @@
 #include <stdio.h>
 
 int main(){
-	int first  = nodeSystemAddPipe("First",NODE_CONST,NODE_INT_8,3);
-	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2);
-	int third  = nodeSystemAddPipe("A",NODE_OUT,NODE_INT_8,1);
-	int forth  = nodeSystemAddPipe("C",NODE_IN,NODE_INT_8,1);
+	int8_t constData[3] = {23,12,0};
+
+	int first  = nodeSystemAddPipe("First",NODE_CONST,NODE_INT_8,3,constData);
+	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2,NULL);
+	int third  = nodeSystemAddPipe("A",NODE_OUT,NODE_INT_8,1,NULL);
+	int forth  = nodeSystemAddPipe("C",NODE_IN,NODE_INT_8,1,NULL);
 
 	nodeSystemInit();
 
