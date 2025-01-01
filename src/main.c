@@ -12,7 +12,7 @@ int main(){
 
 	nodeSystemInit();
 
-	nodeSystemBegine();
+	nodeSystemBegine(NULL);
 
 	nodeSystemDebugLog("SystemBegin");
 
