@@ -3,10 +3,12 @@
 #include <stdio.h>
 
 int main(){
-	int first  = nodeSystemAddPipe("First",NODE_CONST,NODE_INT_8,3);
-	int second = nodeSystemAddPipe("Second",NODE_OUT,NODE_DOUBLE,2);
-	int third  = nodeSystemAddPipe("A",NODE_OUT,NODE_INT_8,1);
-	int forth  = nodeSystemAddPipe("C",NODE_IN,NODE_INT_8,1);
+	int8_t constData[3] = {23,12,0};
+
+	int first  = nodeSystemAddPipe("First",NODE_PIPE_CONST,NODE_UNIT_INT8,3,NULL);
+	int second = nodeSystemAddPipe("Second",NODE_PIPE_OUT,NODE_UNIT_DOUBLE,2,NULL);
+	int third  = nodeSystemAddPipe("A",NODE_PIPE_OUT,NODE_UNIT_INT8,1,NULL);
+	int forth  = nodeSystemAddPipe("C",NODE_PIPE_IN,NODE_UNIT_INT8,1,NULL);
 
 	nodeSystemInit();
 
@@ -19,14 +21,14 @@ int main(){
 
 	while(!nodeSystemLoop()){
 		uint8_t wdata = 0;
-		int ret = nodeSystemRead(first,rdata,0);
+		int ret = nodeSystemRead(first,rdata);
 		if(ret == 1){
 			wdata = rdata[0] + 1;
 		}
 
-		nodeSystemWrite(third,&wdata,0);
+		nodeSystemWrite(third,&wdata);
 		sprintf(msg,"Count %d",(int)rdata[0]);
 		nodeSystemDebugLog(msg);
-		sleep(3);
+		nodeSystemWait();
 	}
 }
