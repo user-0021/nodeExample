@@ -1,5 +1,5 @@
 #build executable file
-build:out
+build:example.node
 
 #make objs
 obj:
@@ -11,10 +11,10 @@ obj/main.o: src/main.c
 obj/nodeSystem.o: library/nodeSystem/nodeSystem.c
 	gcc -o obj/nodeSystem.o library/nodeSystem/nodeSystem.c -I include -I library/nodeSystem -c
 
-out: obj obj/main.o obj/nodeSystem.o
-	gcc -o out obj/main.o obj/nodeSystem.o
+example.node: obj obj/main.o obj/nodeSystem.o
+	gcc -o example.node obj/main.o obj/nodeSystem.o
 
-all: clean out
+all: clean example.node
 
 clean:
-	$(RM) out obj/main.o obj/nodeSystem.o
+	$(RM) example.node obj/main.o obj/nodeSystem.o

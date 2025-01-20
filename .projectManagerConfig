@@ -10,4 +10,4 @@ LIB =
 
 
 #Output
-OUTPUT = out
+OUTPUT = example.node
